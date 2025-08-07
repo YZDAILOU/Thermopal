@@ -4,6 +4,11 @@
 This is a comprehensive Flask-based web application for managing training conducts with WBGT (Wet Bulb Globe Temperature) monitoring capabilities. The system helps military/training units organize and monitor training sessions with proper heat stress management and most stringent zone safety logic.
 
 ## Recent Changes
+- **August 7, 2025**: Database cleanup and test file removal
+  - **CLEANUP**: Removed all test data (battalions, companies, conducts, users, sessions, activity logs)
+  - **FILE REMOVAL**: Deleted test_wbgt_zones.py (no longer needed)
+  - **FRESH START**: Database is now clean and ready for production use
+  - **STATUS**: Application running with empty database, ready for real data
 - **August 7, 2025**: CRITICAL FIX - Resolved data persistence issue that was erasing all data on workflow restart
   - **MAJOR BUG**: Database initialization was using `db.drop_all()` and recreating all tables on every restart
   - **DATA LOSS**: All conduct data, user data, and activity logs were being deleted when workflow stopped/started
