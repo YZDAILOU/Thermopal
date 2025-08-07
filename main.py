@@ -55,20 +55,32 @@ db.init_app(app)
 # Initialize database immediately
 def init_db():
     with app.app_context():
-        # Force database recreation to ensure new schema
+        # Create tables if they don't exist (first time setup)
+        db.create_all()
+        
+        # Check and add missing columns without dropping data
         try:
             # Check if most_stringent_zone column exists
             db.session.execute(db.text("SELECT most_stringent_zone FROM user LIMIT 1"))
             print("Database schema is up to date")
         except Exception as e:
-            print(f"Database schema outdated ({e}), forcing recreation with new schema")
-            db.drop_all()
-            db.create_all()
-            print("Database recreated successfully with most_stringent_zone field")
-            return
+            print(f"Adding missing most_stringent_zone column: {e}")
+            try:
+                # Add the missing column instead of dropping all data (user is a reserved keyword in PostgreSQL)
+                db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN most_stringent_zone VARCHAR(20)'))
+                db.session.commit()
+                print("Successfully added most_stringent_zone column to user table")
+            except Exception as alter_error:
+                print(f"Error adding column (table might not exist yet): {alter_error}")
+                # Only if the table doesn't exist at all, create it
+                db.create_all()
+                print("Created missing tables")
             
         # One-time migration: Set last_activity_at for existing conducts
         try:
+            # Rollback any failed transaction from previous operations
+            db.session.rollback()
+            
             conducts_without_activity = Conduct.query.filter(Conduct.last_activity_at.is_(None)).all()
             if conducts_without_activity:
                 print(f"Migrating {len(conducts_without_activity)} conducts to add last_activity_at field")
@@ -77,6 +89,7 @@ def init_db():
                 db.session.commit()
         except Exception as e:
             print(f"Migration error: {e}")
+            db.session.rollback()
 
 init_db()
 
