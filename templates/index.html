@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThermoPal - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold tracking-tight mb-4">
+                <span class="text-gray-400">Th</span><span class="text-green-500">e</span><span class="text-green-600">r</span><span class="text-green-700">m</span><span class="text-yellow-500">o</span><span class="text-red-500">P</span><span class="text-red-600">a</span><span class="text-gray-800">l</span>
+            </h1>
+            <div class="flex justify-center space-x-1 mb-6">
+                <div class="w-6 h-1 bg-gray-400 rounded-full"></div>
+                <div class="w-6 h-1 bg-green-500 rounded-full"></div>
+                <div class="w-6 h-1 bg-yellow-500 rounded-full"></div>
+                <div class="w-6 h-1 bg-red-500 rounded-full"></div>
+                <div class="w-6 h-1 bg-gray-800 rounded-full"></div>
+            </div>
+            <p class="text-xl text-gray-600 mb-2">WBGT Multi-Unit Tracking System</p>
+            <p class="text-gray-500">Manage training conducts across multiple units</p>
+        </div>
+
+        <!-- Main Options -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Create Conduct -->
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Create Conduct</h3>
+                    <p class="text-gray-600 text-sm mb-4">Set up a new training exercise or operation for your unit</p>
+                    <a href="{{ url_for('create_conduct') }}" 
+                       class="inline-block w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                        Create New Conduct
+                    </a>
+                </div>
+            </div>
+
+            <!-- Join Conduct -->
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Join Conduct</h3>
+                    <p class="text-gray-600 text-sm mb-4">Enter a conduct PIN to join an active training session</p>
+                    <a href="{{ url_for('join_conduct') }}" 
+                       class="inline-block w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors font-medium">
+                        Join Training Session
+                    </a>
+                </div>
+            </div>
+
+            <!-- View Conducts -->
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">View Conducts</h3>
+                    <p class="text-gray-600 text-sm mb-4">Access existing training sessions and records for your unit</p>
+                    <a href="{{ url_for('view_conducts') }}" 
+                       class="inline-block w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors font-medium">
+                        View Unit Conducts
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Management -->
+        <div class="mb-8">
+            <div class="max-w-sm mx-auto">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3">Change Password</h3>
+                        <p class="text-gray-600 text-sm mb-4">Update your battalion or company password from default to a secure custom password</p>
+                        <a href="{{ url_for('change_password') }}" 
+                           class="inline-block w-full bg-orange-600 text-white py-3 px-6 rounded-md hover:bg-orange-700 transition-colors font-medium">
+                            Change Password
+                        </a>
+                        <div class="mt-3 text-xs text-gray-500">
+                            <p>• Battalion & Company passwords</p>
+                            <p>• Secure validation</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Information Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">How It Works</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2">For Unit Leaders</h3>
+                    <ul class="text-gray-600 space-y-1 text-sm">
+                        <li>• Create conducts for your unit using your battalion password</li>
+                        <li>• Share the auto-generated PIN with participants</li>
+                        <li>• Monitor all training sessions from the conducting body interface</li>
+                        <li>• Access historical training records and analytics</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2">For Participants</h3>
+                    <ul class="text-gray-600 space-y-1 text-sm">
+                        <li>• Join training sessions using the conduct PIN</li>
+                        <li>• Track your work-rest cycles with real-time timers</li>
+                        <li>• Select appropriate WBGT zones based on conditions</li>
+                        <li>• Receive automated notifications for cycle management</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-500 text-sm">
+            <p>ThermoPal WBGT Multi-Unit Tracking System</p>
+            <p>Ensuring safety through systematic work-rest cycle management</p>
+        </div>
+    </div>
+</body>
+</html>

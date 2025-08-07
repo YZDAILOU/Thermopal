@@ -1,0 +1,1019 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<!-- Enhanced Universal Notification System - Works for all WBGT zones and persists across page navigation -->
+<script src="/static/enhanced-notifications.js"></script>
+
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+  <!-- Header Section -->
+  <div class="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            WBGT Tracker
+          </h1>
+          <p class="text-sm text-gray-500 mt-1">Real-time work cycle monitoring</p>
+        </div>
+
+        <!-- User Info Card -->
+        <div class="flex items-center space-x-4">
+          <div class="text-right">
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-600">Logged in as:</span>
+              <span id="current-username" class="font-semibold text-gray-900">{{ username }}</span>
+            </div>
+            <div class="mt-1">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200">
+                {{ user.role.title() }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-4xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- Timer Section -->
+      <div class="lg:col-span-2">
+        <div class="bg-white/70 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-xl p-6">
+          <div class="text-center">
+            <!-- Timer Circle -->
+            <div class="relative w-48 h-48 mx-auto mb-4">
+              <svg class="absolute top-0 left-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" stroke="#f3f4f6" stroke-width="8" fill="none" />
+                <circle id="progress-ring" cx="50" cy="50" r="45" 
+                  stroke="{% if user.zone == 'white' %}#6b7280{% elif user.zone == 'green' %}#10b981{% elif user.zone == 'yellow' %}#f59e0b{% elif user.zone == 'red' %}#ef4444{% elif user.zone == 'black' %}#374151{% else %}#10b981{% endif %}" 
+                  stroke-width="8" fill="none"
+                  stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" 
+                  class="transition-all duration-300 drop-shadow-sm" />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <div id="countdown" class="text-3xl font-bold {% if user.zone %}text-gray-800{% else %}text-gray-500{% endif %} mb-2">--:--</div>
+                <div class="text-sm font-medium text-gray-600 mb-2" id="zone_name_display">
+                  {% if user.zone %}Zone: {{ user.zone.title() }}{% endif %}
+                </div>
+                <div class="text-xs text-center text-gray-500" id="time_display">
+                  {% if user.start_time and user.end_time %}
+                  <div class="space-y-1">
+                    <div>Start: <span class="font-semibold">{{ user.start_time }}</span></div>
+                    <div>End: <span class="font-semibold">{{ user.end_time }}</span></div>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Stop Button and Clear Interface -->
+            <div id="stop-button-container" class="hidden">
+              <button id="stop-cycle-button" onclick="stopCycleEarly()" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 mr-2">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h6v4H9z"></path>
+                </svg>
+                Stop Cycle Early
+              </button>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Location Management -->
+      <div class="space-y-6">
+        <div class="bg-white/70 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-xl p-4">
+          <h3 class="text-base font-semibold text-gray-900 mb-3 flex items-center">
+            <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            Location
+          </h3>
+          <div class="space-y-2">
+            <div class="flex gap-2">
+              <input type="text" id="location_name" placeholder="Location name..." 
+                class="flex-1 px-2 py-1.5 bg-white/80 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs transition-colors">
+              <button onclick="saveCurrentLocation()" 
+                class="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-md hover:from-blue-600 hover:to-blue-700 transition-all duration-200 text-xs font-medium shadow-sm">
+                Save
+              </button>
+            </div>
+            <select id="saved_locations" 
+              class="w-full px-2 py-1.5 bg-white/80 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs transition-colors">
+              <option value="">Select saved location</option>
+            </select>
+            <div id="current_location" class="text-xs text-gray-600 bg-gray-50/80 p-2 rounded-md border border-gray-200"></div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- WBGT Zones Section -->
+    <div class="mt-8">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">WBGT Zones</h2>
+        <p class="text-gray-600">Select your work zone based on current temperature conditions</p>
+      </div>
+
+      <!-- System Status Alerts -->
+      {% if system_status.cut_off %}
+        <div class="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 text-red-700 px-6 py-4 rounded-xl mb-6 shadow-sm">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            <div>
+              <strong class="font-bold">Cut-Off Mode Active!</strong>
+              <p class="text-sm mt-1">All activities must stop. Please wait for further instructions.</p>
+            </div>
+          </div>
+        </div>
+      {% elif system_status.cut_off_end_time %}
+        <div class="bg-gradient-to-r from-yellow-50 to-amber-100 border border-yellow-200 text-yellow-700 px-6 py-4 rounded-xl mb-6 shadow-sm">
+          <div class="flex items-center">
+            <svg class="w-5 h-5 mr-3 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+              <strong class="font-bold">Mandatory Rest Period</strong>
+              <p class="text-sm mt-1">Normal activities will resume after: {{ system_status.cut_off_end_time }}</p>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Zone Buttons -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" {% if system_status.cut_off or (system_status.cut_off_end_time and user.role == 'trainer') %}style="pointer-events: none; opacity: 0.5"{% endif %}>
+        {% for key, z in zones.items() %}
+          {% if key != 'cut-off' and key != 'test' %}
+            <button onclick="startZone('{{ key }}')"
+              class="group relative overflow-hidden p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300
+              {% if key == 'white' %}bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800 border-2 border-gray-300
+              {% elif key == 'green' %}bg-gradient-to-br from-green-400 to-green-500 text-white
+              {% elif key == 'yellow' %}bg-gradient-to-br from-yellow-300 to-yellow-400 text-yellow-900
+              {% elif key == 'red' %}bg-gradient-to-br from-red-400 to-red-500 text-white
+              {% elif key == 'black' %}bg-gradient-to-br from-gray-800 to-gray-900 text-white
+              {% endif %}">
+              <div class="relative z-10">
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-xl font-bold">{{ key.title() }}</h3>
+                  <div class="w-4 h-4 rounded-full 
+                    {% if key == 'white' %}bg-gray-400
+                    {% elif key == 'green' %}bg-green-300
+                    {% elif key == 'yellow' %}bg-yellow-200
+                    {% elif key == 'red' %}bg-red-300
+                    {% elif key == 'black' %}bg-gray-600
+                    {% endif %}"></div>
+                </div>
+                <p class="text-sm mb-2 {% if key == 'white' %}text-gray-600{% elif key == 'yellow' %}text-yellow-800{% else %}opacity-90{% endif %}">
+                  Work: {{ z.work }} mins · Rest: {{ z.rest }} mins
+                </p>
+                <p class="text-xs {% if key == 'white' %}text-gray-500{% elif key == 'yellow' %}text-yellow-700{% else %}opacity-75{% endif %}">
+                  {% if key == 'white' %}29.9°C & Below
+                  {% elif key == 'green' %}30.0°C to 30.9°C
+                  {% elif key == 'yellow' %}31.0°C to 31.9°C
+                  {% elif key == 'red' %}32.0°C to 32.9°C
+                  {% elif key == 'black' %}33.0°C to 34.9°C
+                  {% endif %}
+                </p>
+              </div>
+              <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+            </button>
+          {% endif %}
+        {% endfor %}
+
+        <!-- Test Cycle Button -->
+        <button onclick="startTestCycle()" 
+          class="group relative overflow-hidden bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-bold">Test Cycle</h3>
+              <svg class="w-6 h-6 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <p class="text-purple-100 text-sm mb-1">Work: 7 secs · Rest: 10 secs</p>
+            <p class="text-xs text-purple-200">Test Only</p>
+          </div>
+          <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Work Complete Modal -->
+<div id="work-complete-modal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                            Work Cycle Complete!
+                        </h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500" id="modal-message">
+                                Great job! Time to start your rest cycle.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button id="start-rest-btn" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
+                    Start Rest Cycle
+                </button>
+                <button id="dismiss-modal-btn" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables - declare once
+window.currentUser = "{{ username }}";
+window.userId = {{ user.id }};
+window.conductId = {{ user.conduct_id }};
+window.userRole = "{{ user.role }}";
+
+// Use window properties to avoid redeclaration  
+const userId = window.userId;
+const conductId = window.conductId;
+
+// Function to get rest time for zone (helper function)
+function getRestTimeForZone(zone) {
+    const restTimes = {
+      'white': 15,
+      'green': 15,
+      'yellow': 15,
+      'red': 30,
+      'black': 30,
+      'test': 10
+    };
+    return restTimes[zone] || 15;
+}</script>
+
+<script>
+// Initialize socket connection
+const socket = io();
+
+// Join conduct room for real-time updates
+socket.emit('join_conduct', { conduct_id: conductId });
+
+// Timer variables (use window to avoid conflicts)
+let currentEndTime = null;
+let isWorkCycle = false;
+let serverTimeOffset = 0;
+
+// Server time synchronization
+function getServerSynchronizedTime() {
+    return new Date(Date.now() + serverTimeOffset);
+}
+
+async function synchronizeWithServerTime() {
+    try {
+        const response = await fetch('/get_server_time');
+        const data = await response.json();
+        const serverTimestamp = data.timestamp * 1000;
+        const localTimestamp = Date.now();
+        serverTimeOffset = serverTimestamp - localTimestamp;
+        console.log(`Server time sync: offset = ${serverTimeOffset}ms`);
+    } catch (error) {
+        console.error('Failed to sync with server time:', error);
+        serverTimeOffset = 0;
+    }
+}
+
+// Initialize timer for users already in working states
+function initializeTimer() {
+    const endTime = "{{ user.end_time }}";
+    const status = "{{ user.status }}";  
+    const zone = "{{ user.zone }}";
+    
+    if (endTime && endTime !== "None" && (status === "working" || status === "resting")) {
+        currentEndTime = endTime;
+        isWorkCycle = (status === "working");
+        
+        if (zone && zone !== "None") {
+            updateZoneDisplay(zone);
+        }
+        
+        startTimer();
+        updateTimeDisplay("{{ user.start_time }}", endTime);
+        
+        if (status === "working") {
+            document.getElementById('stop-button-container').classList.remove('hidden');
+        }
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    await synchronizeWithServerTime();
+    initializeTimer();
+    loadSavedLocations();
+    updateCurrentLocation();
+
+    // Enhanced browser detection and notification initialization
+    const userAgent = navigator.userAgent;
+    const vendor = navigator.vendor;
+    const isChrome = /Chrome/.test(userAgent) && /Google Inc/.test(vendor);
+    const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+    const isEdge = /Edg/.test(userAgent);
+    
+    console.log('Browser detection:', {
+        userAgent,
+        vendor,
+        isChrome,
+        isSafari,
+        isEdge,
+        notificationSupport: 'Notification' in window,
+        serviceWorkerSupport: 'serviceWorker' in navigator,
+        currentPermission: Notification.permission
+    });
+    
+    if (isChrome && !isEdge) {
+        console.log('Chrome browser detected - initializing Chrome notifications');
+        // Try Chrome-specific notifications first
+        try {
+            const chromeInitSuccess = await initializeChromeNotifications(window.currentUser);
+            if (chromeInitSuccess) {
+                console.log('Chrome notifications initialized successfully');
+                updateNotificationStatus('Chrome notifications enabled');
+                document.getElementById('chrome-notification-panel').style.display = 'none';
+                checkPendingChromeReminders();
+            } else {
+                console.log('Chrome notifications need user permission - showing enable button');
+                showChromeNotificationPanel();
+            }
+        } catch (error) {
+            console.error('Chrome notification initialization failed:', error);
+            showChromeNotificationPanel();
+        }
+    } else if (isSafari) {
+        console.log('Safari browser detected - initializing Firebase notifications');
+        // For Safari and other browsers, use Firebase notifications
+        try {
+            if (typeof initializeFirebaseNotifications === 'function') {
+                await initializeFirebaseNotifications(window.currentUser);
+                console.log('Firebase notifications initialized for Safari');
+            }
+        } catch (error) {
+            console.log('Firebase notification initialization failed:', error);
+        }
+    } else {
+        console.log('Other browser detected:', userAgent);
+        console.log('Attempting Chrome notification fallback');
+        showChromeNotificationPanel();
+    }
+
+    // PRODUCTION FALLBACK: Initialize production notification system for Render deployment
+    // This works independently of service workers and handles page refresh scenarios
+    console.log('Initializing production notification system as fallback');
+    if (typeof initializeProductionNotifications === 'function') {
+        initializeProductionNotifications(window.currentUser);
+    }
+
+    // Check for pending work completion when returning to page
+    setTimeout(() => {
+        if (typeof workModal !== 'undefined') {
+            workModal.checkForPendingWorkCompletion();
+        }
+    }, 1000);
+
+    // PRODUCTION ENHANCEMENT: Start automatic notification checking
+    // This ensures notifications work even without page refresh on Render
+    startAutomaticNotificationCheck();
+
+    // Update dashboard after initialization
+    updateDashboard();
+});
+
+// Helper function to get rest time for zone
+function getRestTimeForZone(zone) {
+    const restTimes = {
+        'white': 15,
+        'green': 15,
+        'yellow': 15,
+        'red': 30,
+        'black': 30,
+        'test': 10
+    };
+    return restTimes[zone] || 15;
+}
+
+function initializeTimer() {
+    {% if user.end_time and user.zone %}
+        // Initialize timer for any user with an active end time and zone
+        currentEndTime = "{{ user.end_time }}";
+
+        // Determine if this is a work or rest cycle based on status
+        {% if user.status == 'resting' %}
+            isWorkCycle = false;
+            document.getElementById('stop-button-container').classList.add('hidden');
+        {% else %}
+            // For 'working' status or 'idle' with work_completed/pending_rest
+            isWorkCycle = true;
+            document.getElementById('stop-button-container').classList.remove('hidden');
+        {% endif %}
+
+        startTimer();
+        updateZoneDisplay("{{ user.zone }}");
+        updateTimeDisplay("{{ user.start_time }}", "{{ user.end_time }}");
+    {% endif %}
+}
+
+
+
+function startZone(zone) {
+    const location = document.getElementById('saved_locations').value || document.getElementById('location_name').value;
+
+    fetch('/set_zone', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'user_id': userId,
+            'target_user': currentUser,
+            'zone': zone,
+            'location': location
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            currentEndTime = data.end_time;
+            isWorkCycle = true;
+            startTimer();
+            updateZoneDisplay(zone);
+            updateTimeDisplay(data.start_time, data.end_time);
+            document.getElementById('stop-button-container').classList.remove('hidden');
+        } else {
+            alert(data.error || 'Failed to start zone');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Network error occurred');
+    });
+}
+
+function startTestCycle() {
+    startZone('test');
+}
+
+function stopCycleEarly() {
+    fetch('/stop_cycle', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'user_id': userId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            clearInterval(window.timerInterval);
+            currentEndTime = null;
+            isWorkCycle = false;
+            document.getElementById('countdown').textContent = '--:--';
+            document.getElementById('stop-button-container').classList.add('hidden');
+            updateProgressRing(0, false);
+        } else {
+            alert(data.error || 'Failed to stop cycle');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Network error occurred');
+    });
+}
+
+function startTimer() {
+    if (window.timerInterval) clearInterval(window.timerInterval);
+
+    window.timerInterval = setInterval(() => {
+        if (!currentEndTime) return;
+
+        // Use local time for timer calculations to avoid synchronization issues  
+        const now = new Date();
+        const end = new Date();
+        const [hours, timeMinutes, seconds] = currentEndTime.split(':');
+        end.setHours(hours, timeMinutes, seconds || 0, 0);
+
+        // Handle midnight rollover: if end time is significantly earlier than current time,
+        // assume it's for the next day
+        const currentHour = now.getHours();
+        const endHour = parseInt(hours);
+        
+        if (endHour < currentHour && (currentHour - endHour) > 12) {
+            end.setDate(end.getDate() + 1);
+            if (!window.dashboardMidnightLogged) {
+                console.log(`Dashboard: Midnight rollover detected for end time ${currentEndTime}`);
+                window.dashboardMidnightLogged = true;
+            }
+        }
+
+        const timeLeft = Math.max(0, end - now);
+        const totalSeconds = Math.ceil(timeLeft / 1000);
+
+        if (totalSeconds <= 0) {
+            clearInterval(window.timerInterval);
+            handleTimerComplete();
+            return;
+        }
+
+        const displayMinutes = Math.floor(totalSeconds / 60);
+        const displaySeconds = totalSeconds % 60;
+        const display = `${displayMinutes}:${String(displaySeconds).padStart(2, '0')}`;
+
+        document.getElementById('countdown').textContent = display;
+        updateProgressRing(timeLeft, isWorkCycle);
+    }, 1000);
+}
+
+function handleTimerComplete() {
+    document.getElementById('countdown').textContent = '0:00';
+    updateProgressRing(0, false);
+
+    if (isWorkCycle) {
+        // Work cycle completed - keep display but hide stop button
+        document.getElementById('stop-button-container').classList.add('hidden');
+        console.log('Work cycle completed - awaiting rest notification');
+        // Don't clear the timer display - let Firebase notifications handle the rest prompt
+    } else {
+        // Rest cycle completed
+        console.log('Rest cycle completed! Ready for next work cycle.');
+        currentEndTime = null;
+        isWorkCycle = false;
+        document.getElementById('zone_name_display').textContent = '';
+        document.getElementById('time_display').innerHTML = '';
+        document.getElementById('countdown').textContent = '--:--';
+    }
+}
+
+function updateProgressRing(timeLeft, isWork) {
+    const ring = document.getElementById('progress-ring');
+    if (!ring) return;
+
+    const radius = 45;
+    const circumference = 2 * Math.PI * radius;
+
+    // Calculate progress based on original duration
+    // Get current zone from DOM or use default
+    const currentZone = document.getElementById('zone_name_display').textContent.toLowerCase().replace('zone: ', '');
+    const zones = {
+        'white': { work: 60, rest: 15 },
+        'green': { work: 45, rest: 15 },
+        'yellow': { work: 30, rest: 15 },
+        'red': { work: 30, rest: 30 },
+        'black': { work: 15, rest: 30 },
+        'test': { work: 0.117, rest: 0.167 } // 7 seconds and 10 seconds in minutes
+    };
+
+    const zoneData = zones[currentZone] || { work: 60, rest: 15 };
+    const totalDuration = isWork ? 
+        (zoneData.work * 60000) : 
+        (zoneData.rest * 60000);
+
+    const progress = timeLeft / totalDuration;
+    const offset = circumference * (1 - progress);
+
+    ring.style.strokeDashoffset = offset;
+}
+
+function updateZoneDisplay(zone) {
+    const zoneDisplay = document.getElementById('zone_name_display');
+    if (zoneDisplay) {
+        if (zone === 'Mandatory Rest') {
+            zoneDisplay.textContent = 'Mandatory Rest Period';
+        } else if (zone) {
+            zoneDisplay.textContent = `Zone: ${zone.charAt(0).toUpperCase() + zone.slice(1)}`;
+        } else {
+            zoneDisplay.textContent = '';
+        }
+    }
+}
+
+function updateTimeDisplay(startTime, endTime) {
+    const timeDisplay = document.getElementById('time_display');
+    if (timeDisplay && startTime && endTime) {
+        timeDisplay.innerHTML = `
+            <div class="space-y-1">
+                <div>Start: <span class="font-semibold">${startTime}</span></div>
+                <div>End: <span class="font-semibold">${endTime}</span></div>
+            </div>
+        `;
+    }
+}
+
+// Location management
+function saveCurrentLocation() {
+    const locationName = document.getElementById('location_name').value.trim();
+    if (!locationName) return;
+
+    let savedLocations = JSON.parse(localStorage.getItem('savedLocations') || '[]');
+    if (!savedLocations.includes(locationName)) {
+        savedLocations.push(locationName);
+        localStorage.setItem('savedLocations', JSON.stringify(savedLocations));
+        loadSavedLocations();
+    }
+
+    document.getElementById('location_name').value = '';
+}
+
+function loadSavedLocations() {
+    const savedLocations = JSON.parse(localStorage.getItem('savedLocations') || '[]');
+    const select = document.getElementById('saved_locations');
+
+    // Clear existing options except first
+    while (select.children.length > 1) {
+        select.removeChild(select.lastChild);
+    }
+
+    savedLocations.forEach(location => {
+        const option = document.createElement('option');
+        option.value = location;
+        option.textContent = location;
+        select.appendChild(option);
+    });
+}
+
+function updateCurrentLocation() {
+    const currentDiv = document.getElementById('current_location');
+    const selectedLocation = document.getElementById('saved_locations').value;
+
+    if (selectedLocation) {
+        currentDiv.textContent = `Current: ${selectedLocation}`;
+    } else {
+        currentDiv.textContent = 'No location selected';
+    }
+}
+
+// Event listeners
+document.getElementById('saved_locations').addEventListener('change', updateCurrentLocation);
+
+// Modal handling variables
+let currentModal = null;
+
+// Show work complete modal
+function showWorkCompleteModal(data) {
+    const modal = document.getElementById('work-complete-modal');
+    const title = document.getElementById('modal-title');
+    const message = document.getElementById('modal-message');
+
+    title.textContent = data.title;
+    message.textContent = data.message;
+
+    // Store modal data for button handlers
+    currentModal = data;
+
+    // Show modal
+    modal.classList.remove('hidden');
+
+    console.log('Work complete modal shown for:', data.username);
+}
+
+// Hide work complete modal
+function hideWorkCompleteModal() {
+    const modal = document.getElementById('work-complete-modal');
+    modal.classList.add('hidden');
+    currentModal = null;
+}
+
+// Start rest button handler is now managed by work-notifications.js
+
+// Dismiss modal button handler is now managed by work-notifications.js
+
+// Socket event handlers
+socket.on('user_update', function(data) {
+    console.log('Received user update:', data);
+    if (data.user === window.currentUser) {
+        // Update timer without page reload
+        if (data.end_time) {
+            // User has an active timer (working, resting, or work completed pending rest)
+            currentEndTime = data.end_time;
+
+            if (data.status === 'resting') {
+                isWorkCycle = false;
+                document.getElementById('stop-button-container').classList.add('hidden');
+
+                // Handle mandatory rest display (when zone is null but user is resting)
+                if (!data.zone || data.zone === null) {
+                    updateZoneDisplay('Mandatory Rest');
+                } else {
+                    updateZoneDisplay(data.zone);
+                }
+            } else {
+                // For 'working' or 'idle' with work_completed/pending_rest
+                isWorkCycle = true;
+                if (data.zone) {
+                    document.getElementById('stop-button-container').classList.remove('hidden');
+                }
+                updateZoneDisplay(data.zone);
+            }
+
+            startTimer();
+            updateTimeDisplay(data.start_time, data.end_time);
+        } else if (data.status === 'idle' && !data.work_completed) {
+            // Only clear timer if truly idle (not work completed)
+            clearInterval(window.timerInterval);
+            currentEndTime = null;
+            isWorkCycle = false;
+            document.getElementById('countdown').textContent = '--:--';
+            document.getElementById('zone_name_display').textContent = '';
+            document.getElementById('time_display').innerHTML = '';
+            document.getElementById('stop-button-container').classList.add('hidden');
+            updateProgressRing(0, false);
+        }
+    }
+});
+
+socket.on('system_status_update', function(data) {
+    console.log('Received system status update:', data);
+    updateSystemStatusDisplay(data);
+});
+
+socket.on('connect', function() {
+    console.log('Socket connected');
+    // Rejoin conduct room on reconnect
+    socket.emit('join_conduct', { conduct_id: conductId });
+});
+
+socket.on('disconnect', function() {
+    console.log('Socket disconnected');
+});
+
+function updateSystemStatusDisplay(systemStatus) {
+    // Find and remove existing status alerts
+    const existingAlerts = document.querySelectorAll('.bg-gradient-to-r.from-red-50, .bg-gradient-to-r.from-yellow-50');
+    existingAlerts.forEach(alert => alert.remove());
+
+    const mainContent = document.querySelector('.max-w-4xl.mx-auto');
+    if (!mainContent) return;
+
+    const zonesSection = document.querySelector('.mt-8');
+
+    if (systemStatus.cut_off) {
+        const cutOffAlert = document.createElement('div');
+        cutOffAlert.className = 'bg-gradient-to-r from-red-50 to-red-100 border border-red-200 text-red-700 px-6 py-4 rounded-xl mb-6 shadow-sm';
+        cutOffAlert.innerHTML = `
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                <div>
+                    <strong class="font-bold">Cut-Off Mode Active!</strong>
+                    <p class="text-sm mt-1">All activities must stop. Please wait for further instructions.</p>
+                </div>
+            </div>
+        `;
+        zonesSection.insertBefore(cutOffAlert, zonesSection.querySelector('.grid'));
+
+        // Disable zone buttons
+        const zoneGrid = document.querySelector('.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3');
+        if (zoneGrid) {
+            zoneGrid.style.pointerEvents = 'none';
+            zoneGrid.style.opacity = '0.5';
+        }
+    } else if (systemStatus.cut_off_end_time) {
+        const restAlert = document.createElement('div');
+        restAlert.className = 'bg-gradient-to-r from-yellow-50 to-amber-100 border border-yellow-200 text-yellow-700 px-6 py-4 rounded-xl mb-6 shadow-sm';
+        restAlert.innerHTML = `
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <strong class="font-bold">Mandatory Rest Period</strong>                    <p class="text-sm mt-1">Normal activities will resume after: ${systemStatus.cut_off_end_time}</p>
+                </div>
+            </div>
+        `;
+        zonesSection.insertBefore(restAlert, zonesSection.querySelector('.grid'));
+
+        // Disable zone buttons for trainers
+        const zoneGrid = document.querySelector('.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3');
+        if (zoneGrid && userRole === 'trainer') {
+            zoneGrid.style.pointerEvents = 'none';
+            zoneGrid.style.opacity = '0.5';
+        }
+    } else {
+        // Re-enable zone buttons
+        const zoneGrid = document.querySelector('.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3');
+        if (zoneGrid) {
+            zoneGrid.style.pointerEvents = '';
+            zoneGrid.style.opacity = '';
+        }
+    }
+}
+
+// DISABLED: show_work_complete_modal handler removed
+
+// DISABLED: All automatic notification handlers removed
+
+// Force refresh dashboard data
+function updateDashboard() {
+    if (!window.currentUser) return;
+
+    fetch(`/get_user_state/${window.currentUser}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Updating dashboard with data:', data);
+
+            if (data.end_time && data.zone) {
+                // User has an active timer (working, resting)
+                currentEndTime = data.end_time;
+
+                if (data.status === 'resting') {
+                    isWorkCycle = false;
+                    document.getElementById('stop-button-container').classList.add('hidden');
+
+                    // Special handling for mandatory rest period display
+                    if (!data.zone || data.zone === 'null') {
+                        updateZoneDisplay('Mandatory Rest');
+                    } else {
+                        updateZoneDisplay(data.zone);
+                    }
+                } else {
+                    isWorkCycle = true;
+                    document.getElementById('stop-button-container').classList.remove('hidden');
+                    updateZoneDisplay(data.zone);
+                }
+
+                startTimer();
+                updateTimeDisplay(data.start_time, data.end_time);
+
+            } else if (data.status === 'idle') {
+                // User is idle - clear timer display
+                clearInterval(window.timerInterval);
+                currentEndTime = null;
+                isWorkCycle = false;
+                document.getElementById('countdown').textContent = '--:--';
+                document.getElementById('zone_name_display').textContent = '';
+                document.getElementById('time_display').innerHTML = '';
+                document.getElementById('stop-button-container').classList.add('hidden');
+                updateProgressRing(0, false);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching user state for dashboard update:', error);
+        });
+}
+
+// Chrome notification panel management
+// REMOVED: All old notification functions
+
+// PRODUCTION ENHANCEMENT: Automatic notification checking system
+// This runs continuously and shows notifications even without page refresh
+let automaticNotificationInterval = null;
+let lastNotificationCheck = null;
+
+function startAutomaticNotificationCheck() {
+    console.log('Starting automatic notification check system for production');
+    
+    // Clear any existing interval
+    if (automaticNotificationInterval) {
+        clearInterval(automaticNotificationInterval);
+    }
+    
+    // Check every 3 seconds for work completion
+    automaticNotificationInterval = setInterval(() => {
+        checkForAutomaticNotification();
+    }, 3000);
+}
+
+function checkForAutomaticNotification() {
+    if (!window.currentUser) return;
+    
+    fetch(`/get_user_state/${window.currentUser}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.work_completed && data.pending_rest) {
+                const workEndTime = new Date(data.end_time).getTime();
+                
+                // Only show notification if this is a new work completion
+                if (lastNotificationCheck !== workEndTime) {
+                    console.log('Automatic notification: New work completion detected');
+                    lastNotificationCheck = workEndTime;
+                    
+                    // Show production notification immediately
+                    showAutomaticProductionNotification(data);
+                    
+                    // Also trigger the modal system
+                    if (typeof workModal !== 'undefined') {
+                        const restTime = getRestTimeForZone(data.zone);
+                        workModal.showWorkCompletionModal({
+                            title: '🚨 Work Cycle Complete!',
+                            message: `Your ${data.zone?.toUpperCase() || 'WORK'} zone work cycle has ended. Start your ${restTime} ${data.zone === 'test' ? 'second' : 'minute'} rest cycle now!`,
+                            username: window.currentUser,
+                            zone: data.zone,
+                            rest_duration: restTime
+                        });
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error in automatic notification check:', error);
+        });
+}
+
+function showAutomaticProductionNotification(data) {
+    console.log('Showing automatic production notification for work completion');
+    
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+        console.log('Cannot show automatic notification - not supported or no permission');
+        return;
+    }
+    
+    const restTime = getRestTimeForZone(data.zone);
+    const timeUnit = data.zone === 'test' ? 'second' : 'minute';
+    
+    try {
+        const notification = new Notification('🚨 Work Cycle Complete!', {
+            body: `Your ${data.zone?.toUpperCase() || 'WORK'} zone work cycle has ended. Start your ${restTime} ${timeUnit} rest cycle now!`,
+            icon: '/static/icon-192.png',
+            tag: 'wbgt-auto-notification-' + Date.now(),
+            requireInteraction: true,
+            silent: false
+        });
+
+        notification.onclick = () => {
+            window.focus();
+            notification.close();
+        };
+
+        // Auto-remind after 15 seconds if user doesn't respond
+        setTimeout(() => {
+            if (notification) {
+                notification.close();
+                showAutomaticReminderNotification(data, restTime, timeUnit);
+            }
+        }, 15000);
+
+        console.log('Automatic production notification shown');
+    } catch (error) {
+        console.error('Failed to show automatic production notification:', error);
+    }
+}
+
+function showAutomaticReminderNotification(data, restTime, timeUnit) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+        return;
+    }
+    
+    try {
+        const reminderNotification = new Notification('⚠️ Rest Reminder', {
+            body: `Don't forget: You need to start your rest cycle!`,
+            icon: '/static/icon-192.png',
+            tag: 'wbgt-auto-reminder-' + Date.now(),
+            requireInteraction: true,
+            silent: false
+        });
+
+        reminderNotification.onclick = () => {
+            window.focus();
+            reminderNotification.close();
+        };
+
+        console.log('Automatic reminder notification shown');
+    } catch (error) {
+        console.error('Failed to show automatic reminder notification:', error);
+    }
+}
+
+function stopAutomaticNotificationCheck() {
+    if (automaticNotificationInterval) {
+        clearInterval(automaticNotificationInterval);
+        automaticNotificationInterval = null;
+        console.log('Automatic notification checking stopped');
+    }
+}
+
+// Make updateDashboard globally available
+window.updateDashboard = updateDashboard;</script>
+<script src="/static/main.js"></script>
+<script src="/static/work-notifications.js"></script>
+{% endblock %}

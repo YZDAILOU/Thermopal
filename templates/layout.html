@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ThermoPal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PWA Meta Tags for Chrome Compatibility -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ThermoPal">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#2563eb">
+  <!-- Icons for Notifications -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
+  {% block head %}{% endblock %}
+</head>
+<body class="bg-gray-100 font-sans">
+  <header class="bg-white p-6 shadow-lg">
+    <h1 class="text-5xl font-bold text-center tracking-tight">
+      <span class="text-gray-400">Th</span><span class="text-green-500">e</span><span class="text-green-600">r</span><span class="text-green-700">m</span><span class="text-yellow-500">o</span><span class="text-red-500">P</span><span class="text-red-600">a</span><span class="text-gray-800">l</span>
+    </h1>
+    <div class="text-center mt-2">
+      <div class="flex justify-center space-x-1">
+        <div class="w-6 h-1 bg-gray-400 rounded-full"></div>
+        <div class="w-6 h-1 bg-green-500 rounded-full"></div>
+        <div class="w-6 h-1 bg-yellow-500 rounded-full"></div>
+        <div class="w-6 h-1 bg-red-500 rounded-full"></div>
+        <div class="w-6 h-1 bg-gray-800 rounded-full"></div>
+      </div>
+    </div>
+  </header>
+  <main class="p-4">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

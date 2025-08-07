@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Conducts - ThermoPal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-lg">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Access Unit/Company Conducts</h1>
+            <p class="text-gray-600">Enter your battalion or company credentials to view and manage conducts</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 border border-red-400 text-red-700{% else %}bg-green-100 border border-green-400 text-green-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Access Type Selection -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex space-x-4 mb-6">
+                <button type="button" id="battalionBtn" onclick="switchAccessType('battalion')"
+                        class="flex-1 py-2 px-4 rounded-md font-medium transition-colors bg-purple-600 text-white">
+                    Battalion HQ Access
+                </button>
+                <button type="button" id="companyBtn" onclick="switchAccessType('company')"
+                        class="flex-1 py-2 px-4 rounded-md font-medium transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300">
+                    Company Access
+                </button>
+            </div>
+
+            <!-- Battalion Access Form -->
+            <form method="POST" id="battalionForm" class="space-y-6">
+                <input type="hidden" name="access_type" value="battalion">
+                
+                <div>
+                    <label for="battalion_name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Battalion Name
+                    </label>
+                    <input type="text" id="battalion_name" name="battalion_name" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="e.g., 1st Battalion">
+                    <p class="mt-1 text-sm text-gray-500">
+                        Enter your battalion name exactly as registered
+                    </p>
+                </div>
+
+                <div>
+                    <label for="battalion_password" class="block text-sm font-medium text-gray-700 mb-2">
+                        Battalion Password
+                    </label>
+                    <input type="password" id="battalion_password" name="battalion_password" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="Enter your battalion password">
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-purple-600 text-white py-3 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors font-medium">
+                    View Battalion Overview
+                </button>
+            </form>
+
+            <!-- Company Access Form -->
+            <form method="POST" id="companyForm" class="space-y-6 hidden">
+                <input type="hidden" name="access_type" value="company">
+                
+                <div>
+                    <label for="company_battalion_name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Battalion Name
+                    </label>
+                    <input type="text" id="company_battalion_name" name="company_battalion_name" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="e.g., 1st Battalion">
+                    <p class="mt-1 text-sm text-gray-500">
+                        Enter the battalion name that your company belongs to
+                    </p>
+                </div>
+
+                <div>
+                    <label for="company_name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Company Name
+                    </label>
+                    <input type="text" id="company_name" name="company_name" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="e.g., Alpha Company">
+                    <p class="mt-1 text-sm text-gray-500">
+                        Enter your company name exactly as registered
+                    </p>
+                </div>
+
+                <div>
+                    <label for="company_password" class="block text-sm font-medium text-gray-700 mb-2">
+                        Company Password
+                    </label>
+                    <input type="password" id="company_password" name="company_password" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="Enter your company password">
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-purple-600 text-white py-3 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors font-medium">
+                    View Company Conducts
+                </button>
+            </form>
+        </div>
+
+        <script>
+            function switchAccessType(type) {
+                const battalionBtn = document.getElementById('battalionBtn');
+                const companyBtn = document.getElementById('companyBtn');
+                const battalionForm = document.getElementById('battalionForm');
+                const companyForm = document.getElementById('companyForm');
+
+                if (type === 'battalion') {
+                    battalionBtn.className = 'flex-1 py-2 px-4 rounded-md font-medium transition-colors bg-purple-600 text-white';
+                    companyBtn.className = 'flex-1 py-2 px-4 rounded-md font-medium transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300';
+                    battalionForm.classList.remove('hidden');
+                    companyForm.classList.add('hidden');
+                } else {
+                    battalionBtn.className = 'flex-1 py-2 px-4 rounded-md font-medium transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300';
+                    companyBtn.className = 'flex-1 py-2 px-4 rounded-md font-medium transition-colors bg-purple-600 text-white';
+                    battalionForm.classList.add('hidden');
+                    companyForm.classList.remove('hidden');
+                }
+            }
+        </script>
+
+        <!-- Information -->
+        <div class="mt-6 bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <h3 class="text-sm font-medium text-purple-800 mb-2">Access Types</h3>
+            <div class="text-sm text-purple-700 space-y-3">
+                <div>
+                    <p class="font-medium">Battalion HQ Access:</p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li>Overview of all companies in the battalion</li>
+                        <li>Access to all conducts across companies</li>
+                        <li>Battalion-wide statistics and management</li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-medium">Company Access:</p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li>Company-specific training conducts</li>
+                        <li>Conduct PINs for sharing with personnel</li>
+                        <li>Training session details and history</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back Navigation -->
+        <div class="mt-6 text-center">
+            <a href="{{ url_for('index') }}" class="text-blue-600 hover:text-blue-800 text-sm">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>

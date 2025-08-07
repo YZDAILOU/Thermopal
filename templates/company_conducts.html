@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Conducts - ThermoPal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Company Conducts</h1>
+            <h2 class="text-xl text-gray-600 mb-2">{{ company.name }}</h2>
+            <p class="text-gray-500">{{ company.battalion.name }}</p>
+            <p class="text-gray-500">Training sessions and records</p>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
+            <a href="{{ url_for('create_conduct_new') }}" 
+               class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Create New Conduct
+            </a>
+            <a href="{{ url_for('index') }}" 
+               class="text-gray-600 hover:text-gray-800 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Home
+            </a>
+        </div>
+
+        <!-- Conducts Grid -->
+        {% if conducts %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for conduct in conducts %}
+                    <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+                        <!-- Conduct Header -->
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-semibold text-gray-800 truncate">{{ conduct.name }}</h3>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                         {% if conduct.status == 'active' %}bg-green-100 text-green-800{% else %}bg-orange-100 text-orange-800{% endif %}">
+                                {% if conduct.status == 'active' %}Active{% else %}Inactive (Reactivates on join){% endif %}
+                            </span>
+                        </div>
+
+                        <!-- Conduct Details -->
+                        <div class="text-sm text-gray-600 mb-4">
+                            <p>Created: {{ conduct.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                        </div>
+
+                        <!-- PIN Display -->
+                        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Conduct PIN:</p>
+                                    <p class="text-2xl font-bold text-gray-900 font-mono">{{ conduct.pin }}</p>
+                                </div>
+                                <button onclick="copyPin('{{ conduct.pin }}')" 
+                                        class="text-gray-500 hover:text-gray-700">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-2 gap-4 mb-4 text-center">
+                            <div>
+                                <p class="text-lg font-semibold text-gray-800">{{ conduct.users|length }}</p>
+                                <p class="text-sm text-gray-600">Participants</p>
+                            </div>
+                            <div>
+                                <p class="text-lg font-semibold text-gray-800">{{ conduct.sessions|length }}</p>
+                                <p class="text-sm text-gray-600">Sessions</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-2">
+                            {% if conduct.status == 'active' %}
+                                <a href="{{ url_for('user_setup', conduct_id=conduct.id) }}" 
+                                   class="flex-1 bg-green-600 text-white py-2 px-3 rounded-md hover:bg-green-700 transition-colors text-center text-sm font-medium">
+                                    Join as Participant
+                                </a>
+                                <a href="{{ url_for('user_setup', conduct_id=conduct.id) }}" 
+                                   class="flex-1 bg-blue-600 text-white py-2 px-3 rounded-md hover:bg-blue-700 transition-colors text-center text-sm font-medium">
+                                    Trainer Access
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('user_setup', conduct_id=conduct.id) }}" 
+                                   class="flex-1 bg-orange-600 text-white py-2 px-3 rounded-md hover:bg-orange-700 transition-colors text-center text-sm font-medium">
+                                    Join & Reactivate
+                                </a>
+                                <a href="{{ url_for('user_setup', conduct_id=conduct.id) }}" 
+                                   class="flex-1 bg-orange-600 text-white py-2 px-3 rounded-md hover:bg-orange-700 transition-colors text-center text-sm font-medium">
+                                    Trainer Access
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-12">
+                <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No conducts found</h3>
+                <p class="text-gray-500 mb-6">This company hasn't created any training conducts yet.</p>
+                <a href="{{ url_for('create_conduct_new') }}" 
+                   class="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                    Create Your First Conduct
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function copyPin(pin) {
+            navigator.clipboard.writeText(pin).then(function() {
+                // Could add a toast notification here
+                console.log('PIN copied to clipboard');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThermoPal - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold tracking-tight mb-4">
+                <span class="text-gray-400">Th</span><span class="text-green-500">e</span><span class="text-green-600">r</span><span class="text-green-700">m</span><span class="text-yellow-500">o</span><span class="text-red-500">P</span><span class="text-red-600">a</span><span class="text-gray-800">l</span>
+            </h1>
+            <div class="flex justify-center space-x-1 mb-6">
+                <div class="w-6 h-1 bg-gray-400 rounded-full"></div>
+                <div class="w-6 h-1 bg-green-500 rounded-full"></div>
+                <div class="w-6 h-1 bg-yellow-500 rounded-full"></div>
+                <div class="w-6 h-1 bg-red-500 rounded-full"></div>
+                <div class="w-6 h-1 bg-gray-800 rounded-full"></div>
+            </div>
+            <p class="text-xl text-gray-600 mb-2">Multi-Unit WBGT Tracking System</p>
+        </div>
+
+        <!-- Main Access Options -->
+        <div class="mb-12">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-semibold text-gray-800 mb-2">Conduct Access & Management</h2>
+                <p class="text-gray-600">Choose how you want to access the WBGT tracking system</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+                <!-- Join Conduct -->
+                <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow h-full flex flex-col">
+                    <div class="text-center flex flex-col flex-1">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-3">Join Conduct</h3>
+                        <p class="text-gray-600 mb-8 flex-1 min-h-[48px] flex items-center justify-center">Join an existing conduct using a PIN</p>
+                        <a href="{{ url_for('join_conduct') }}" 
+                           class="inline-block w-full bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 transition-colors font-medium text-lg mt-auto">
+                            Join Existing Conduct
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Create Conduct -->
+                <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow h-full flex flex-col">
+                    <div class="text-center flex flex-col flex-1">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-3">Create Conduct</h3>
+                        <p class="text-gray-600 mb-8 flex-1 min-h-[48px] flex items-center justify-center">Start a new exercise or training session for your unit</p>
+                        <a href="{{ url_for('create_conduct_new') }}" 
+                           class="inline-block w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors font-medium text-lg mt-auto">
+                            Create New Conduct
+                        </a>
+                    </div>
+                </div>
+
+                <!-- View Conducts -->
+                <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow h-full flex flex-col">
+                    <div class="text-center flex flex-col flex-1">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-3">View Conducts</h3>
+                        <p class="text-gray-600 mb-8 flex-1 min-h-[48px] flex items-center justify-center">View all conducts for your unit</p>
+                        <a href="{{ url_for('view_conducts_new') }}" 
+                           class="inline-block w-full bg-purple-600 text-white py-3 px-6 rounded-md hover:bg-purple-700 transition-colors font-medium text-lg mt-auto">
+                            View Unit Conducts
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Management Section -->
+        <div class="mb-12">
+            <div class="max-w-md mx-auto">
+                <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-10 h-10 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Change Password</h3>
+                        <p class="text-gray-600 mb-6">Update your battalion or company password from default to a secure custom password</p>
+                        <a href="{{ url_for('change_password') }}" 
+                           class="inline-block w-full bg-orange-600 text-white py-4 px-6 rounded-md hover:bg-orange-700 transition-colors font-medium text-lg">
+                            Change Password
+                        </a>
+                        <div class="mt-4 text-sm text-gray-500">
+                            <p>• Battalion password changes</p>
+                            <p>• Company password changes</p>
+                            <p>• Secure password validation</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How it Works Section -->
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">How it Works</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="font-semibold text-gray-800 mb-3 text-lg">For Unit Administrators</h3>
+                    <ul class="text-gray-600 space-y-2 text-sm">
+                        <li>• Create new conducts for your unit</li>
+                        <li>• View all past and current conducts</li>
+                        <li>• Manage conduct lifecycle</li>
+                        <li>• Share conduct PINs with trainers</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-800 mb-3 text-lg">For Trainers & Conducting Body</h3>
+                    <ul class="text-gray-600 space-y-2 text-sm">
+                        <li>• Join conducts using provided PINs</li>
+                        <li>• Track WBGT zones and work cycles</li>
+                        <li>• Receive notifications and reminders</li>
+                        <li>• Monitor real-time safety conditions</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Security Notice -->
+            <div class="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="w-5 h-5 text-yellow-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Security Notice</h3>
+                        <p class="mt-1 text-sm text-yellow-700">Use two-layer authentication layers to ensure proper access control. Keep your battalion passwords and conduct PINs secure.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-500 text-sm">
+            <p>ThermoPal WBGT Multi-Unit Tracking System</p>
+            <p>Ensuring safety through systematic work-rest cycle management</p>
+        </div>
+    </div>
+</body>
+</html><!-- Cache buster: 1754469882 -->
