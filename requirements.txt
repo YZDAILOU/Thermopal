@@ -66,3 +66,13 @@ psycopg2-binary
 pytz
 sqlalchemy
 werkzeug
+email-validator
+eventlet
+flask
+flask-socketio
+flask-sqlalchemy
+gunicorn
+psycopg2-binary
+pytz
+sqlalchemy
+werkzeug

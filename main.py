@@ -2013,7 +2013,7 @@ if __name__ == '__main__':
 
     # Use SocketIO's built-in server instead of Gunicorn for better WebSocket support
     socketio.run(app, host='0.0.0.0', port=5000, debug=False, use_reloader=False, 
-                 allow_unsafe_werkzeug=True)
+                 allow_unsafe_werkzeug=True, log_output=False)
 else:
     # For deployment with gunicorn, start background tasks
     start_background_tasks()
