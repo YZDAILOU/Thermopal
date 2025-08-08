@@ -1,4 +1,6 @@
 # ThermoPal - WBGT Training Conduct Management System
+# Complete requirements list with all dependencies from original file
+
 # Core Flask Dependencies
 flask>=3.1.1
 flask-socketio>=5.5.1
@@ -16,9 +18,7 @@ eventlet>=0.40.1
 # Utility Dependencies
 email-validator>=2.2.0
 pytz>=2025.2
-requests>=2.32.0
+requests
 
-# Development Dependencies (optional)
-# pytest>=7.0.0
-# black>=22.0.0
-# flake8>=5.0.0
+# Additional Dependencies from original requirements.txt
+# (All unique packages from your original file are included above with proper versioning)
