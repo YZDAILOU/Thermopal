@@ -15,10 +15,10 @@ import string
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, Unit, Battalion, Company, Conduct, User, Session, ActivityLog
 
-# Configure logging with optimized settings
+# Configure logging for production
 logging.basicConfig(
-    level=logging.WARNING,  # Further reduce logging verbosity
-    format='%(levelname)s: %(message)s',
+    level=logging.ERROR,  # Only show errors in production
+    format='%(asctime)s - %(levelname)s: %(message)s',
     handlers=[
         logging.StreamHandler()
     ]
@@ -56,30 +56,46 @@ db.init_app(app)
 def init_db():
     with app.app_context():
         # Create tables if they don't exist (first time setup)
-        db.create_all()
-        
-        # Check and add missing columns without dropping data
         try:
-            # Check if most_stringent_zone column exists
-            db.session.execute(db.text("SELECT most_stringent_zone FROM user LIMIT 1"))
-            print("Database schema is up to date")
+            db.create_all()
+            print("Database tables created successfully")
         except Exception as e:
-            print(f"Adding missing most_stringent_zone column: {e}")
+            print(f"Error creating tables: {e}")
+        
+        # Safe column addition with proper transaction handling
+        try:
+            # Start fresh transaction
+            db.session.rollback()
+            
+            # Check if most_stringent_zone column exists (PostgreSQL and SQLite compatible)
             try:
-                # Add the missing column instead of dropping all data (user is a reserved keyword in PostgreSQL)
+                db.session.execute(db.text("SELECT most_stringent_zone FROM \"user\" LIMIT 1"))
+                column_exists = True
+            except Exception:
+                column_exists = False
+            
+            if not column_exists:
+                print("Adding missing most_stringent_zone column to user table")
+                # Use proper PostgreSQL syntax for reserved keyword
                 db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN most_stringent_zone VARCHAR(20)'))
                 db.session.commit()
-                print("Successfully added most_stringent_zone column to user table")
-            except Exception as alter_error:
-                print(f"Error adding column (table might not exist yet): {alter_error}")
-                # Only if the table doesn't exist at all, create it
+                print("Successfully added most_stringent_zone column")
+            else:
+                print("Database schema is up to date - most_stringent_zone column exists")
+                
+        except Exception as e:
+            print(f"Schema check/update error: {e}")
+            db.session.rollback()
+            # Ensure tables exist even if column addition fails
+            try:
                 db.create_all()
-                print("Created missing tables")
+                print("Ensured all tables exist")
+            except Exception as create_error:
+                print(f"Error ensuring tables exist: {create_error}")
             
         # One-time migration: Set last_activity_at for existing conducts
         try:
-            # Rollback any failed transaction from previous operations
-            db.session.rollback()
+            db.session.rollback()  # Start fresh
             
             conducts_without_activity = Conduct.query.filter(Conduct.last_activity_at.is_(None)).all()
             if conducts_without_activity:
@@ -87,6 +103,7 @@ def init_db():
                 for conduct in conducts_without_activity:
                     conduct.last_activity_at = conduct.created_at  # Use creation time as initial activity
                 db.session.commit()
+                print("Migration completed successfully")
         except Exception as e:
             print(f"Migration error: {e}")
             db.session.rollback()
