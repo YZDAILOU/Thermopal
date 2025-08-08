@@ -56,3 +56,13 @@ pytz
 sqlalchemy
 werkzeug
 requests
+email-validator
+eventlet
+flask
+flask-socketio
+flask-sqlalchemy
+gunicorn
+psycopg2-binary
+pytz
+sqlalchemy
+werkzeug
