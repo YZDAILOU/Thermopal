@@ -198,7 +198,7 @@ function calculateTimeLeft(endTime) {
     }
 
     const timeLeftMs = Math.max(0, end - now);
-    const timeLeftSecs = Math.floor(timeLeftMs / 1000); // Use Math.floor instead of Math.ceil for accuracy
+    const timeLeftSecs = Math.ceil(timeLeftMs / 1000); // Match trainer interface: Round UP for consistency
 
     if (timeLeftSecs <= 0) return '0:00';
 

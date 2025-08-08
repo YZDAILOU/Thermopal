@@ -414,12 +414,14 @@ function startTimer(startTime, endTime, zone) {
     const now = getServerSynchronizedTime(); // Use server-synchronized time
     // Calculate exact remaining time in milliseconds, then round up to next second
     const timeLeftMs = Math.max(0, endDate - now);
-    const timeLeft = Math.ceil(timeLeftMs / 1000); // Round UP for consistency
+    const timeLeft = Math.ceil(timeLeftMs / 1000); // Round UP for consistency (matches monitor.html)
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
 
-    if (timerElement) {
-      timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    // Update timer display element
+    const countdownElement = document.getElementById('countdown');
+    if (countdownElement) {
+      countdownElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 
     // Stop timer when it reaches zero
@@ -445,13 +447,10 @@ function startTimer(startTime, endTime, zone) {
     }
   }, 1000);
 
-  // Also update immediately for current time
-  const timeLeft = Math.max(0, endDate - now);
-  const minutes = Math.floor(timeLeft / 60000);
-  const seconds = Math.floor((timeLeft % 60000) / 1000);
-
-  if (timerElement) {
-    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  // Show stop button when timer is active
+  const stopButtonContainer = document.getElementById('stop-button-container');
+  if (stopButtonContainer) {
+    stopButtonContainer.style.display = 'block';
   }
 
   // Show the stop button
