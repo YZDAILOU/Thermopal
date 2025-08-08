@@ -263,9 +263,9 @@ def log_activity(conduct_id, username, action, zone=None, details=None):
         db.session.commit()
         print(f"DEBUG: Activity log committed to database for {username}: {action}")
 
-        # Emit to conduct room
+        # Emit to conduct room (unlimited history)
         socketio.emit('history_update', {
-            'history': get_recent_history(conduct_id, 20)
+            'history': get_recent_history(conduct_id)
         }, room=f'conduct_{conduct_id}')
         print(f"DEBUG: History update emitted for conduct {conduct_id}")
 
@@ -274,11 +274,16 @@ def log_activity(conduct_id, username, action, zone=None, details=None):
         logging.error(f"Error logging activity: {e}")
         db.session.rollback()
 
-def get_recent_history(conduct_id, limit=20):
-    """Get recent activity history for a conduct"""
-    logs = ActivityLog.query.filter_by(conduct_id=conduct_id)\
-                           .order_by(ActivityLog.timestamp.desc())\
-                           .limit(limit).all()
+def get_recent_history(conduct_id, limit=None):
+    """Get activity history for a conduct (unlimited by default)"""
+    query = ActivityLog.query.filter_by(conduct_id=conduct_id)\
+                           .order_by(ActivityLog.timestamp.desc())
+    
+    # Only apply limit if specified
+    if limit:
+        query = query.limit(limit)
+    
+    logs = query.all()
 
     return [{
         'timestamp': log.timestamp.strftime('%Y-%m-%d %I:%M:%S %p'),
@@ -553,7 +558,7 @@ def check_user_cycles():
                             # Small delay before emitting to ensure database is fully consistent
                             time.sleep(0.1)
                             
-                            updated_history = get_recent_history(conduct_id, 20)
+                            updated_history = get_recent_history(conduct_id)
                             
                             # Emit history update with complete data
                             socketio.emit('history_update', {
@@ -1088,7 +1093,7 @@ def monitor(user_id):
                          conduct_id=user.conduct_id,
                          zones=WBGT_ZONES,
                          system_status=system_status,
-                         history=get_recent_history(user.conduct_id, 20))
+                         history=get_recent_history(user.conduct_id))
 
 # API Routes for real-time functionality
 
@@ -1550,7 +1555,7 @@ def check_activity_history(conduct_id):
     try:
         recent_logs = ActivityLog.query.filter_by(conduct_id=conduct_id)\
                                      .order_by(ActivityLog.timestamp.desc())\
-                                     .limit(20).all()
+                                     .all()
         
         return jsonify({
             'conduct_id': conduct_id,
@@ -1636,7 +1641,7 @@ def force_rest_completion(username):
         
         # Force immediate history refresh for monitors
         socketio.emit('history_update', {
-            'history': get_recent_history(conduct_id, 20)
+            'history': get_recent_history(conduct_id)
         }, room=f'conduct_{conduct_id}')
         
         print(f"FORCE: Rest completion processed successfully for {user_name} in zone {completed_zone}")
@@ -1656,7 +1661,7 @@ def force_rest_completion(username):
 def get_conduct_history(conduct_id):
     """Get activity history for a specific conduct"""
     try:
-        history = get_recent_history(conduct_id, 20)
+        history = get_recent_history(conduct_id)
         return jsonify({
             'success': True,
             'conduct_id': conduct_id,
@@ -1686,7 +1691,7 @@ def test_activity_log(conduct_id):
         db.session.commit()
         
         # Retrieve recent logs to verify
-        recent_logs = get_recent_history(conduct_id, 5)
+        recent_logs = get_recent_history(conduct_id, 5)  # Keep limit for test endpoint
         
         return jsonify({
             "success": True,
@@ -1760,7 +1765,7 @@ def test_rest_completion(username):
         
         # Force immediate history refresh for monitors
         socketio.emit('history_update', {
-            'history': get_recent_history(conduct_id, 20)
+            'history': get_recent_history(conduct_id)
         }, room=f'conduct_{conduct_id}')
         
         print(f"MANUAL TEST: Rest completion processed successfully for {user_name} in zone {completed_zone}")

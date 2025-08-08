@@ -577,8 +577,8 @@ function updateHistoryTable(history) {
   const historyTbody = document.querySelector('#history-table tbody');
   if (!historyTbody) return;
 
-  // Get the latest 20 entries
-  const latestEntries = history.slice(-20).reverse();
+  // Show all entries (unlimited history)
+  const latestEntries = history.slice().reverse();
 
   historyTbody.innerHTML = latestEntries.map(entry => `
     <tr>
