@@ -22,3 +22,14 @@ requests
 
 # Additional Dependencies from original requirements.txt
 # (All unique packages from your original file are included above with proper versioning)
+email-validator
+eventlet
+flask
+flask-socketio
+flask-sqlalchemy
+gunicorn
+psycopg2-binary
+pytz
+requests
+sqlalchemy
+werkzeug

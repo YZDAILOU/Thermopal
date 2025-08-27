@@ -1,4 +1,4 @@
-modules = ["web", "nodejs-20", "python-3.12"]
+modules = ["web", "nodejs-20", "python-3.11"]
 run = "python main.py"
 
 [nix]
@@ -45,3 +45,4 @@ externalPort = 80
 
 [agent]
 integrations = ["javascript_database==1.0.0"]
+expertMode = true
