@@ -1,12 +1,13 @@
-modules = ["python-3.11", "postgresql-16"]
+modules = ["web", "nodejs-20", "python-3.12"]
+run = "python main.py"
 
 [nix]
-channel = "stable-24_05"
+channel = "stable-25_05"
 packages = ["iana-etc", "openssl", "postgresql", "sqlite"]
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+run = ["sh", "-c", "python main.py"]
 
 [workflows]
 runButton = "Project"
